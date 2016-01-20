@@ -7374,8 +7374,8 @@ var Grid = require('../collision/Grid');
             element: null,
             canvas: null,
             options: {
-                width: 800,
-                height: 600,
+                width: 1080,
+                height: 1920,
                 pixelRatio: 1,
                 background: '#fafafa',
                 wireframeBackground: '#222',
@@ -8591,8 +8591,8 @@ module.exports = RenderPixi;
             element: null,
             canvas: null,
             options: {
-                width: 800,
-                height: 600,
+                width: 1080,
+                height: 1920,
                 background: '#fafafa',
                 wireframeBackground: '#222',
                 hasBounds: false,
