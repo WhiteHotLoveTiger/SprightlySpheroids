@@ -4,6 +4,8 @@
 
 "use strict";
 
+var DEBUG = false;
+
 var width = window.innerWidth
 || document.documentElement.clientWidth
 || document.body.clientWidth;
@@ -20,6 +22,58 @@ var Engine = Matter.Engine,
     Common = Matter.Common,
     Vertices = Matter.Vertices;
 
+var SS = {};
+
+var _engine,
+    _sceneName = 'mixed',
+    _sceneWidth,
+    _sceneHeight,
+    _deviceOrientationEvent;
+
+SS.init = function() {
+	window.addEventListener('deviceorientation', function(event) {
+	  _deviceOrientationEvent = event;
+	  SS.updateGravity(event);
+	}, true);
+};
+
+SS.updateGravity = function(event) {
+  if (!_engine)
+    return;
+  
+  var orientation = window.orientation,
+    gravity = _engine.world.gravity;
+
+  if (orientation === 0) {
+    gravity.x = Common.clamp(event.gamma, -90, 90) / 90;
+    gravity.y = Common.clamp(event.beta, -90, 90) / 90;
+  } else if (orientation === 180) {
+    gravity.x = Common.clamp(event.gamma, -90, 90) / 90;
+    gravity.y = Common.clamp(-event.beta, -90, 90) / 90;
+  } else if (orientation === 90) {
+    gravity.x = Common.clamp(event.beta, -90, 90) / 90;
+    gravity.y = Common.clamp(-event.gamma, -90, 90) / 90;
+  } else if (orientation === -90) {
+    gravity.x = Common.clamp(-event.beta, -90, 90) / 90;
+    gravity.y = Common.clamp(event.gamma, -90, 90) / 90;
+  }
+};
+
+SS.fullscreen = function(){
+  var _fullscreenElement = _engine.render.canvas;
+  
+  if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+    if (_fullscreenElement.requestFullscreen) {
+      _fullscreenElement.requestFullscreen();
+    } else if (_fullscreenElement.mozRequestFullScreen) {
+      _fullscreenElement.mozRequestFullScreen();
+    } else if (_fullscreenElement.webkitRequestFullscreen) {
+      _fullscreenElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  }
+};
+
+
 // create a Matter.js engine
 var engine = Engine.create(document.body);
 
@@ -31,9 +85,9 @@ var tennisBall = Bodies.circle(500, 200, 60, {
             friction: 0.001,
             render: {
                 sprite: {
-                    texture: 'assets/img/tennis-ball.png',
-                    xScale: 0.1,
-                    yScale: 0.1
+                    texture: 'assets/img/tennis-ball_128.png',
+                    //xScale: 0.1,
+                    //yScale: 0.1
                 }
             }
         });
@@ -44,9 +98,9 @@ var baseball = Bodies.circle(800, 200, 62, {
             friction: 0.0005,
             render: {
                 sprite: {
-                    texture: 'assets/img/baseball.png',
-                    xScale: 0.09,
-      				yScale: 0.09
+                    texture: 'assets/img/baseball_128.png',
+                    //xScale: 0.09,
+      				      //yScale: 0.09
                 }
             }
         });
@@ -62,9 +116,9 @@ var heFlask = Bodies.polygon(500, 900, 3, 125, {
             //angle: 0.52,
             render: {
                 sprite: {
-                    texture: 'assets/img/erlenmeyer-flask-Rotated30.png',
-                    xScale: 0.2,
-                    yScale: 0.22
+                    texture: 'assets/img/erlenmeyer-flask-Rotated30_225.png',
+                    //xScale: 0.2,
+                    //yScale: 0.22
                 }
             }
     });
@@ -81,9 +135,9 @@ var football = Bodies.fromVertices(200, 200, footballVertices, {
     restitution: 0.9,
     render: {
         sprite: {
-            texture: 'assets/img/football.png',
-            xScale: 0.25,
-            yScale: 0.195
+            texture: 'assets/img/football_320.png',
+            //xScale: 0.25,
+            //yScale: 0.195
         }
     }
 });
@@ -105,10 +159,20 @@ var boxB = Bodies.rectangle(450, 400, 40, 160, {
 });
 
 // create the edges of our world
-var ground    = Bodies.rectangle( 540, 1920, 1080,   20, { isStatic: true });
-var ceiling   = Bodies.rectangle( 540,    0, 1080,   20, { isStatic: true });
-var leftWall  = Bodies.rectangle(   0,  960,   20, 1920, { isStatic: true });
-var rightWall = Bodies.rectangle(1080,  960,   20, 1920, { isStatic: true });
+var ground, ceiling, leftWall, rightWall;
+//if (DEBUG) {
+	ground    = Bodies.rectangle( 540, 1920, 1080,   20, { isStatic: true });
+	ceiling   = Bodies.rectangle( 540,    0, 1080,   20, { isStatic: true });
+	leftWall  = Bodies.rectangle(   0,  960,   20, 1920, { isStatic: true });
+	rightWall = Bodies.rectangle(1080,  960,   20, 1920, { isStatic: true });
+/* } else {
+	var halfH = height/2;
+	var halfW = width/2;
+	ground    = Bodies.rectangle(halfW, height, width,     20, { isStatic: true });
+	ceiling   = Bodies.rectangle(halfW,      0, width,     20, { isStatic: true });
+	leftWall  = Bodies.rectangle(    0,  halfH,    20, height, { isStatic: true });
+	rightWall = Bodies.rectangle(width,  halfH,    20, height, { isStatic: true });
+} */
 
 // add all of the bodies to the world
 World.add(engine.world, [tennisBall, baseball, heFlask, football, boxA, boxB, ground, ceiling, leftWall, rightWall]);
@@ -116,21 +180,28 @@ World.add(engine.world, [tennisBall, baseball, heFlask, football, boxA, boxB, gr
 var renderOptions = engine.render.options;
 renderOptions.background = 'assets/img/bg/brickWall3.jpg';
 renderOptions.showAngleIndicator = false;
-renderOptions.wireframes = true;
+renderOptions.wireframes = false;
 renderOptions.hasBounds = true;
 
 // keep these values for testing, but switch to device height/width for release
-engine.render.canvas.height = 1920; // height
-engine.render.canvas.width = 1080;  // width
+if (DEBUG) {
+	engine.render.canvas.height = 1920; 
+	engine.render.canvas.width = 1080;  
+	renderOptions.height = 1920;
+	renderOptions.width = 1080;
+} else {
+	engine.render.canvas.height = height; 
+	engine.render.canvas.width = width; 
+	renderOptions.height = height;
+	renderOptions.width = width;
+}
 
-engine.world.bounds.max.x = 1080;
-engine.world.bounds.max.y = 1920;
+//engine.world.bounds.max.x = 1080;
+//engine.world.bounds.max.y = 1920;
 
-//renderOptions.height = 1920;
-//renderOptions.width = 1080;
 
-engine.positionIterations = 1;
-engine.velocityIterations = 1;
+engine.positionIterations = 10;
+engine.velocityIterations = 10;
 
 
 // run the engine
