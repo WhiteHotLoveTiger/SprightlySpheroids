@@ -4,7 +4,7 @@
 
 "use strict";
 
-var DEBUG = false;
+//var DEBUG = true;
 
 var width = window.innerWidth
 || document.documentElement.clientWidth
@@ -160,19 +160,19 @@ var boxB = Bodies.rectangle(450, 400, 40, 160, {
 
 // create the edges of our world
 var ground, ceiling, leftWall, rightWall;
-//if (DEBUG) {
-	ground    = Bodies.rectangle( 540, 1920, 1080,   20, { isStatic: true });
-	ceiling   = Bodies.rectangle( 540,    0, 1080,   20, { isStatic: true });
-	leftWall  = Bodies.rectangle(   0,  960,   20, 1920, { isStatic: true });
-	rightWall = Bodies.rectangle(1080,  960,   20, 1920, { isStatic: true });
-/* } else {
-	var halfH = height/2;
-	var halfW = width/2;
-	ground    = Bodies.rectangle(halfW, height, width,     20, { isStatic: true });
-	ceiling   = Bodies.rectangle(halfW,      0, width,     20, { isStatic: true });
-	leftWall  = Bodies.rectangle(    0,  halfH,    20, height, { isStatic: true });
-	rightWall = Bodies.rectangle(width,  halfH,    20, height, { isStatic: true });
-} */
+// place the walls as though we're guaranteed 1080x1920
+ground    = Bodies.rectangle( 540, 1920, 1080,   20, { isStatic: true });
+ceiling   = Bodies.rectangle( 540,    0, 1080,   20, { isStatic: true });
+leftWall  = Bodies.rectangle(   0,  960,   20, 1920, { isStatic: true });
+rightWall = Bodies.rectangle(1080,  960,   20, 1920, { isStatic: true });
+/* // alternative way, places bounding walls depending on screen size
+var halfH = height/2;
+var halfW = width/2;
+ground    = Bodies.rectangle(halfW, height, width,     20, { isStatic: true });
+ceiling   = Bodies.rectangle(halfW,      0, width,     20, { isStatic: true });
+leftWall  = Bodies.rectangle(    0,  halfH,    20, height, { isStatic: true });
+rightWall = Bodies.rectangle(width,  halfH,    20, height, { isStatic: true });
+*/
 
 // add all of the bodies to the world
 World.add(engine.world, [tennisBall, baseball, heFlask, football, boxA, boxB, ground, ceiling, leftWall, rightWall]);
@@ -183,18 +183,17 @@ renderOptions.showAngleIndicator = false;
 renderOptions.wireframes = false;
 renderOptions.hasBounds = true;
 
-// keep these values for testing, but switch to device height/width for release
-if (DEBUG) {
-	engine.render.canvas.height = 1920; 
-	engine.render.canvas.width = 1080;  
-	renderOptions.height = 1920;
-	renderOptions.width = 1080;
-} else {
-	engine.render.canvas.height = height; 
-	engine.render.canvas.width = width; 
-	renderOptions.height = height;
-	renderOptions.width = width;
-}
+// force 1080x1920, even if it goes off the screen
+/* engine.render.canvas.height = 1920; 
+engine.render.canvas.width = 1080;  
+renderOptions.height = 1920;
+renderOptions.width = 1080; */
+// stretch the 1080x1920 to fit whatever we've got
+engine.render.canvas.height = height; 
+engine.render.canvas.width = width; 
+renderOptions.height = height;
+renderOptions.width = width;
+
 
 //engine.world.bounds.max.x = 1080;
 //engine.world.bounds.max.y = 1920;
