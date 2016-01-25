@@ -178,7 +178,7 @@ rightWall = Bodies.rectangle(width,  halfH,    20, height, { isStatic: true });
 World.add(engine.world, [tennisBall, baseball, heFlask, football, boxA, boxB, ground, ceiling, leftWall, rightWall]);
 
 var renderOptions = engine.render.options;
-renderOptions.background = 'assets/img/bg/brickWall3.jpg';
+renderOptions.background = 'assets/img/bg/brickWallBlur.jpg';
 renderOptions.showAngleIndicator = false;
 renderOptions.wireframes = false;
 renderOptions.hasBounds = true;
